@@ -1,0 +1,57 @@
+name: Priority List
+on:
+  schedule: [{ cron: '0 2 * * 1' }] # 02:00 (AM, UTC) Mondays
+  workflow_dispatch:
+    inputs:
+      p_label_graveyard:
+        required: true
+        type: number
+        default: 4
+        description: largest N (lowest priority) label
+      weight_reactions:
+        required: true
+        type: number
+        default: 14
+        description: weight for reactions to original issue
+      weight_staleness:
+        required: true
+        type: number
+        default: 1
+        description: weight for days of inactivity
+      weight_age:
+        required: true
+        type: number
+        default: 0.14285714285714285  # 1/7
+        description: weight for days open
+      weight_activity:
+        required: true
+        type: number
+        default: 7
+        description: weight for number of comments
+      repos:
+        required: true
+        type: string
+        default: iterative/cml iterative/cml.dev iterative/terraform-provider-iterative iterative/tpi
+        # iterative/cml-playground
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Fetch issues & PRs
+      run: |
+        REPOS=(${{ inputs.repos }})
+        ./.github/workflows/fetch.sh "${REPOS[@]}"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/setup-python@v4
+      with: { python-version: '3.x' }
+    - name: Prioritise
+      run: |
+        ./.github/workflows/prioritise.py >> $GITHUB_STEP_SUMMARY
+      env:
+        P_LABEL_GRAVEYARD: ${{ inputs.p_label_graveyard }}
+        WEIGHT_REACTIONS: ${{ inputs.weight_reactions }}
+        WEIGHT_STALENESS: ${{ inputs.weight_staleness }}
+        WEIGHT_AGE: ${{ inputs.weight_age }}
+        WEIGHT_ACTIVITY: ${{ inputs.weight_activity }}
