@@ -5,10 +5,11 @@ import os
 import pathlib
 import re
 
-WEIGHT_REACTIONS = float(os.environ.get("WEIGHT_REACTIONS", 14.0) or 14.0)
-WEIGHT_STALENESS = float(os.environ.get("WEIGHT_STALENESS", 1.0) or 1.0)
+WEIGHT_ACTIVITY = float(os.environ.get("WEIGHT_ACTIVITY", 14) or 14)
+WEIGHT_REACTIONS = float(os.environ.get("WEIGHT_REACTIONS", 7) or 7)
+WEIGHT_STALENESS = float(os.environ.get("WEIGHT_STALENESS", 1) or 1)
 WEIGHT_AGE = float(os.environ.get("WEIGHT_AGE", 0.14285714285714285) or 0.14285714285714285)  # 1/7
-WEIGHT_ACTIVITY = float(os.environ.get("WEIGHT_ACTIVITY", 7.0) or 7.0)
+MULTIPLIER_PR = float(os.environ.get("MULTIPLIER_PR", 7) or 7)
 P_LABEL_GRAVEYARD = float(os.environ.get("P_LABEL_GRAVEYARD", 4) or 4)
 
 NOW = datetime.datetime.now()
@@ -28,11 +29,15 @@ def label_priority(label):
 
 def priority(issue):
     return (
-        WEIGHT_REACTIONS * sum(r["users"]["totalCount"] for r in issue["reactionGroups"])
-        + WEIGHT_STALENESS * age_days(issue["updatedAt"])
-        + WEIGHT_AGE * age_days(issue["createdAt"])
-        + WEIGHT_ACTIVITY * len(issue["comments"])
-    ) * (sum(label_priority(lab["name"]) for lab in issue["labels"]) or P_LABEL_GRAVEYARD)
+        (
+            WEIGHT_REACTIONS * sum(r["users"]["totalCount"] for r in issue["reactionGroups"])
+            + WEIGHT_STALENESS * age_days(issue["updatedAt"])
+            + WEIGHT_AGE * age_days(issue["createdAt"])
+            + WEIGHT_ACTIVITY * len(issue["comments"])
+        )
+        * (sum(label_priority(lab["name"]) for lab in issue["labels"]) or P_LABEL_GRAVEYARD)
+        * (MULTIPLIER_PR if issue["url"].rsplit("/", 2)[-2] == "pull" else 1)
+    )
 
 
 def markdown_link(issue):

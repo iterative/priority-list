@@ -14,10 +14,15 @@ on:
           iterative/setup-dvc
           iterative/tpi
         # iterative/cml-playground
-      weight_reactions:
+      weight_activity:
         required: true
         type: number
         default: 14
+        description: weight for number of comments
+      weight_reactions:
+        required: true
+        type: number
+        default: 7
         description: weight for reactions to original issue
       weight_staleness:
         required: true
@@ -29,11 +34,11 @@ on:
         type: number
         default: 0.14285714285714285  # 1/7
         description: weight for days open
-      weight_activity:
+      multiplier_pr:
         required: true
         type: number
         default: 7
-        description: weight for number of comments
+        description: weight multiplier for PRs (compared to issues)
       p_label_graveyard:
         required: true
         type: number
@@ -56,8 +61,9 @@ jobs:
       run: |
         ./.github/workflows/prioritise.py >> $GITHUB_STEP_SUMMARY
       env:
-        P_LABEL_GRAVEYARD: ${{ inputs.p_label_graveyard }}
+        WEIGHT_ACTIVITY: ${{ inputs.weight_activity }}
         WEIGHT_REACTIONS: ${{ inputs.weight_reactions }}
         WEIGHT_STALENESS: ${{ inputs.weight_staleness }}
         WEIGHT_AGE: ${{ inputs.weight_age }}
-        WEIGHT_ACTIVITY: ${{ inputs.weight_activity }}
+        MULTIPLIER_PR: ${{ inputs.multiplier_pr }}
+        P_LABEL_GRAVEYARD: ${{ inputs.p_label_graveyard }}
