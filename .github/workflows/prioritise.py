@@ -5,11 +5,11 @@ import os
 import pathlib
 import re
 
-P_LABEL_GRAVEYARD = float(os.environ.get("P_LABEL_GRAVEYARD", 4) or 4)
 WEIGHT_REACTIONS = float(os.environ.get("WEIGHT_REACTIONS", 14.0) or 14.0)
 WEIGHT_STALENESS = float(os.environ.get("WEIGHT_STALENESS", 1.0) or 1.0)
 WEIGHT_AGE = float(os.environ.get("WEIGHT_AGE", 0.14285714285714285) or 0.14285714285714285)  # 1/7
 WEIGHT_ACTIVITY = float(os.environ.get("WEIGHT_ACTIVITY", 7.0) or 7.0)
+P_LABEL_GRAVEYARD = float(os.environ.get("P_LABEL_GRAVEYARD", 4) or 4)
 
 NOW = datetime.datetime.now()
 

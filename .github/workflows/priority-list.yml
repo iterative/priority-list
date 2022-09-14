@@ -3,11 +3,17 @@ on:
   schedule: [{ cron: '0 2 * * 1' }] # 02:00 (AM, UTC) Mondays
   workflow_dispatch:
     inputs:
-      p_label_graveyard:
+      repos:
         required: true
-        type: number
-        default: 4
-        description: largest N (lowest priority) label
+        type: string
+        default: >-
+          iterative/cml
+          iterative/cml.dev
+          iterative/terraform-provider-iterative
+          iterative/setup-cml
+          iterative/setup-dvc
+          iterative/tpi
+        # iterative/cml-playground
       weight_reactions:
         required: true
         type: number
@@ -28,11 +34,11 @@ on:
         type: number
         default: 7
         description: weight for number of comments
-      repos:
+      p_label_graveyard:
         required: true
-        type: string
-        default: iterative/cml iterative/cml.dev iterative/terraform-provider-iterative iterative/tpi
-        # iterative/cml-playground
+        type: number
+        default: 4
+        description: largest pN-label (lowest priority)
 jobs:
   list:
     runs-on: ubuntu-latest
