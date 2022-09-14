@@ -41,13 +41,22 @@ on:
       weight_age:
         required: true
         type: number
-        default: 0.14285714285714285  # 1/7
+        default: 0.142857  # 1/7
         description: weight for days open
       multiplier_pr:
         required: true
         type: number
         default: 7
         description: weight multiplier for PRs (compared to issues)
+      multiplier_labels:
+        required: true
+        type: string
+        default: >-
+          example:-1
+          epic:0.142857
+          blocked:0.142857
+          invalid:0.142857
+        description: weight multiplier for labels (negative to exclude)
       p_label_graveyard:
         required: true
         type: number
@@ -75,4 +84,5 @@ jobs:
         WEIGHT_STALENESS: ${{ inputs.weight_staleness }}
         WEIGHT_AGE: ${{ inputs.weight_age }}
         MULTIPLIER_PR: ${{ inputs.multiplier_pr }}
+        MULTIPLIER_LABELS: ${{ inputs.multiplier_labels }}
         P_LABEL_GRAVEYARD: ${{ inputs.p_label_graveyard }}
