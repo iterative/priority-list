@@ -12,8 +12,17 @@ on:
           iterative/terraform-provider-iterative
           iterative/setup-cml
           iterative/setup-dvc
+          iterative/status.cml.dev
           iterative/tpi
-        # iterative/cml-playground
+          iterative/example_cml
+          iterative/cml_base_case
+          iterative/cml_cloud_case
+          iterative/cml_dvc_case
+          iterative/cml_tensorboard_case
+          iterative/cml-runner-base-case
+          iterative/blog-tpi-jupyter
+          iterative/blog-tpi-bees
+        # iterative/cml-playground # not public
       weight_activity:
         required: true
         type: number
