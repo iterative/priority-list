@@ -66,13 +66,8 @@ def prettify_link(issue, slack=False):
 
 
 def assigned(issue):
-    PEOPLE = {
-        "dacbd": "U03APQNM5ML",
-        "casperdcl": "UQN12A65N",
-        "0x2b3bfa0": "U01NS7060QJ",
-        "DavidGOrtega": "UR93561CN",
-        "tasdomas": "U03R2LN5ACB",
-    }
+    with open("people.json") as fd:
+        PEOPLE = json.load(fd)
     return " ".join(
         f"<@{user}>"
         for user in filter(None, (PEOPLE.get(i["login"], "") for i in issue["assignees"]))
