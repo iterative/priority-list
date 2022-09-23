@@ -4,8 +4,12 @@ import json
 import os
 import pathlib
 import re
+import sys
 from bisect import bisect_right
 from functools import reduce
+from itertools import chain
+
+from requests import post
 
 WEIGHT_ACTIVITY = float(os.environ.get("WEIGHT_ACTIVITY", 14) or 14)
 WEIGHT_REACTIONS = float(os.environ.get("WEIGHT_REACTIONS", 7) or 7)
@@ -17,7 +21,7 @@ MULTIPLIER_LABELS = os.environ.get("MULTIPLIER_LABELS", MULTIPLIER_LABELS) or MU
 MULTIPLIER_LABELS = dict(i.rsplit(":", 1) for i in MULTIPLIER_LABELS.split())
 MULTIPLIER_LABELS = {k: float(v) for k, v in MULTIPLIER_LABELS.items()}
 P_LABEL_GRAVEYARD = float(os.environ.get("P_LABEL_GRAVEYARD", 4) or 4)
-
+SLACK_WEBHOOK = os.environ.get("SLACK_WEBHOOK", "")
 NOW = datetime.datetime.now()
 
 
@@ -51,10 +55,29 @@ def priority(issue):
     )
 
 
-def markdown_link(issue):
+def prettify_link(issue, slack=False):
     url = issue["url"]
+    title = issue["title"]
     pretty = url.split("/", 3)[-1].replace("/issues/", "#").replace("/pull/", "#")
-    return f"[{pretty}]({url})"
+    return f"<{url}|{title}>" if slack else f"[{pretty}]({url})"
+
+
+def assigned(issue):
+    PEOPLE = {
+        "dacbd": "U03APQNM5ML",
+        "casperdcl": "UQN12A65N",
+        "0x2b3bfa0": "U01NS7060QJ",
+        "DavidGOrtega": "UR93561CN",
+        "tasdomas": "U03R2LN5ACB",
+    }
+    return " ".join(
+        f"<@{user}>"
+        for user in filter(None, (PEOPLE.get(i["login"], "") for i in issue["assignees"]))
+    )
+
+
+def truncate(string, max_len):
+    return string[: max_len - 3] + "..." if len(string) > max_len else string
 
 
 if __name__ == "__main__":
@@ -70,14 +93,83 @@ if __name__ == "__main__":
     N = len(issues)
     print(
         "\n".join(
-            f"{i}|{priority(issues[i]):.0f}|{markdown_link(issues[i])}" for i in range(min(10, N))
+            f"{i}|{priority(issues[i]):.0f}|{prettify_link(issues[i])}" for i in range(min(10, N))
         )
     )
     if N > 15:
         print("...|...|...")
         print(
             "\n".join(
-                f"{i}|{priority(issues[i]):.0f}|{markdown_link(issues[i])}"
+                f"{i}|{priority(issues[i]):.0f}|{prettify_link(issues[i])}"
                 for i in range(N - 5, N)
             )
         )
+
+    blocks = []
+    for i in chain(range(min(10, N)), [None], range(N - 5, N)):
+        if i is None:
+            blocks.append({"type": "section", "text": {"type": "plain_text", "text": "..."}})
+            continue
+        blocks.append(
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": prettify_link(issues[i], True),
+                },
+                "accessory": {
+                    "type": "overflow",
+                    "options": [
+                        {
+                            "text": {
+                                "type": "plain_text",
+                                "text": f":1234: rank {i}/{N}",
+                                "emoji": True,
+                            }
+                        },
+                        {
+                            "text": {
+                                "type": "plain_text",
+                                "text": f":fire: weight {priority(issues[i]):.0f}",
+                                "emoji": True,
+                            }
+                        },
+                        {
+                            "text": {
+                                "type": "plain_text",
+                                "text": f":calendar: {age_days(issues[i]['updatedAt'])}"
+                                " days stale",
+                                "emoji": True,
+                            }
+                        },
+                        {
+                            "text": {
+                                "type": "plain_text",
+                                "text": f":silhouette: {assigned(issues[i])}",
+                                "emoji": True,
+                            }
+                        },
+                        {
+                            "text": {
+                                "type": "plain_text",
+                                "text": ":label: "
+                                + truncate(
+                                    " ".join(lab["name"] for lab in issues[i]["labels"]), 67
+                                ),
+                                "emoji": True,
+                            }
+                        },
+                    ],
+                },
+            }
+        )
+    payload = {
+        "blocks": [
+            {"type": "section", "text": {"type": "mrkdwn", "text": "_*Priorities*_"}},
+            *blocks,
+        ]
+    }
+    if SLACK_WEBHOOK:
+        post(SLACK_WEBHOOK, json=payload)
+    else:
+        print(json.dumps(payload), file=sys.stderr)

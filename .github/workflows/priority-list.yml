@@ -1,6 +1,6 @@
 name: Priority List
 on:
-  schedule: [{ cron: '0 2 * * 1' }] # 02:00 (AM, UTC) Mondays
+  schedule: [{ cron: '0 2 * * 1' }]  # 02:00 (AM, UTC) Mondays
   workflow_dispatch:
     inputs:
       repos:
@@ -75,6 +75,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/setup-python@v4
       with: { python-version: '3.x' }
+    - run: pip install requests
     - name: Prioritise
       run: |
         ./.github/workflows/prioritise.py >> $GITHUB_STEP_SUMMARY
@@ -86,3 +87,5 @@ jobs:
         MULTIPLIER_PR: ${{ inputs.multiplier_pr }}
         MULTIPLIER_LABELS: ${{ inputs.multiplier_labels }}
         P_LABEL_GRAVEYARD: ${{ inputs.p_label_graveyard }}
+        SLACK_WEBHOOK: ${{ github.event_name && secrets.SLACK_WEBHOOK || '' }}
+        # SLACK_WEBHOOK: ${{ github.event_name == 'schedule' && secrets.SLACK_WEBHOOK || '' }}
