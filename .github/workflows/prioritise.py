@@ -76,10 +76,6 @@ def assigned(issue):
     )
 
 
-def truncate(string, max_len):
-    return string[: max_len - 3] + "..." if len(string) > max_len else string
-
-
 if __name__ == "__main__":
     issues = sum((json.load(d.open()) for d in pathlib.Path(".").glob("*.*.json")), [])
     issues.sort(key=priority, reverse=True)
@@ -105,69 +101,18 @@ if __name__ == "__main__":
             )
         )
 
-    blocks = []
+    slack_md = ""
     for i in chain(range(min(10, N)), [None], range(N - 5, N)):
         if i is None:
-            blocks.append({"type": "section", "text": {"type": "plain_text", "text": "..."}})
-            continue
-        blocks.append(
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": prettify_link(issues[i], True),
-                },
-                "accessory": {
-                    "type": "overflow",
-                    "options": [
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": f":1234: rank {i}/{N}",
-                                "emoji": True,
-                            }
-                        },
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": f":fire: weight {priority(issues[i]):.0f}",
-                                "emoji": True,
-                            }
-                        },
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": f":calendar: {age_days(issues[i]['updatedAt'])}"
-                                " days stale",
-                                "emoji": True,
-                            }
-                        },
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": f":technologist: {assigned(issues[i])}",
-                                "emoji": True,
-                            }
-                        },
-                        {
-                            "text": {
-                                "type": "plain_text",
-                                "text": ":label: "
-                                + truncate(
-                                    " ".join(lab["name"] for lab in issues[i]["labels"]), 67
-                                ),
-                                "emoji": True,
-                            }
-                        },
-                    ],
-                },
-            }
-        )
+            slack_md += "...\n"
+        else:
+            slack_md += (
+                f":fire: {priority(issues[i]):.0f} :calendar: {age_days(issues[i]['updatedAt'])}"
+                f" {prettify_link(issues[i], True)} {assigned(issues[i])}"
+                "\n"
+            )
     payload = {
-        "blocks": [
-            {"type": "section", "text": {"type": "mrkdwn", "text": "_*Priorities*_"}},
-            *blocks,
-        ]
+        "blocks": [{"type": "section", "text": {"type": "mrkdwn", "text": slack_md.rstrip()}}]
     }
     if SLACK_WEBHOOK:
         post(SLACK_WEBHOOK, json=payload)
