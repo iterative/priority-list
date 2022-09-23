@@ -87,34 +87,24 @@ if __name__ == "__main__":
     print("#|weight|link")
     print("-:|-:|:-")
     N = len(issues)
-    print(
-        "\n".join(
-            f"{i}|{priority(issues[i]):.0f}|{prettify_link(issues[i])}" for i in range(min(10, N))
-        )
-    )
-    if N > 15:
-        print("...|...|...")
-        print(
-            "\n".join(
-                f"{i}|{priority(issues[i]):.0f}|{prettify_link(issues[i])}"
-                for i in range(N - 5, N)
-            )
-        )
-
     slack_md = ""
     for i in chain(range(min(10, N)), [None], range(N - 5, N)):
         if i is None:
+            if N <= 15:
+                break
+            print("...|...|...")
             slack_md += "...\n"
         else:
+            print(f"{i}|{priority(issues[i]):.0f}|{prettify_link(issues[i])}")
             slack_md += (
                 f":fire: {priority(issues[i]):.0f} :calendar: {age_days(issues[i]['updatedAt'])}"
                 f" {prettify_link(issues[i], True)} {assigned(issues[i])}"
                 "\n"
             )
-    payload = {
+    slack_payload = {
         "blocks": [{"type": "section", "text": {"type": "mrkdwn", "text": slack_md.rstrip()}}]
     }
     if SLACK_WEBHOOK:
-        post(SLACK_WEBHOOK, json=payload)
+        post(SLACK_WEBHOOK, json=slack_payload)
     else:
-        print(json.dumps(payload), file=sys.stderr)
+        print(json.dumps(slack_payload), file=sys.stderr)
