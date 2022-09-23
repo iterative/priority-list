@@ -87,5 +87,4 @@ jobs:
         MULTIPLIER_PR: ${{ inputs.multiplier_pr }}
         MULTIPLIER_LABELS: ${{ inputs.multiplier_labels }}
         P_LABEL_GRAVEYARD: ${{ inputs.p_label_graveyard }}
-        SLACK_WEBHOOK: ${{ github.event_name && secrets.SLACK_WEBHOOK || '' }}
-        # SLACK_WEBHOOK: ${{ github.event_name == 'schedule' && secrets.SLACK_WEBHOOK || '' }}
+        SLACK_WEBHOOK: ${{ github.event_name == 'schedule' && secrets.SLACK_WEBHOOK || '' }}

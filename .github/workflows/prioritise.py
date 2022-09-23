@@ -145,7 +145,7 @@ if __name__ == "__main__":
                         {
                             "text": {
                                 "type": "plain_text",
-                                "text": f":silhouette: {assigned(issues[i])}",
+                                "text": f":technologist: {assigned(issues[i])}",
                                 "emoji": True,
                             }
                         },
