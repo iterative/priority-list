@@ -22,6 +22,9 @@ MULTIPLIER_LABELS = dict(i.rsplit(":", 1) for i in MULTIPLIER_LABELS.split())
 MULTIPLIER_LABELS = {k: float(v) for k, v in MULTIPLIER_LABELS.items()}
 P_LABEL_GRAVEYARD = float(os.environ.get("P_LABEL_GRAVEYARD", 4) or 4)
 SLACK_WEBHOOK = os.environ.get("SLACK_WEBHOOK", "")
+GITHUB_SERVER_URL = os.environ.get("GITHUB_SERVER_URL", "")
+GITHUB_REPOSITORY = os.environ.get("GITHUB_REPOSITORY", "")
+GITHUB_RUN_ID = os.environ.get("GITHUB_RUN_ID", "")
 NOW = datetime.datetime.now()
 
 
@@ -87,7 +90,14 @@ if __name__ == "__main__":
     print("#|weight|link")
     print("-:|-:|:-")
     N = len(issues)
-    slack_md = ""
+    slack_md = ":fire: "
+    if GITHUB_SERVER_URL and GITHUB_REPOSITORY and GITHUB_RUN_ID:
+        slack_md += (
+            f"*<{GITHUB_SERVER_URL}/{GITHUB_REPOSITORY}/actions/runs/{GITHUB_RUN_ID}|priority>*"
+        )
+    else:
+        slack_md += "priority"
+    slack_md += " :calendar: staleness\n"
     for i in chain(range(min(10, N)), [None], range(N - 5, N)):
         if i is None:
             if N <= 15:
