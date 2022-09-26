@@ -70,6 +70,9 @@ jobs:
     - name: Fetch issues & PRs
       run: |
         REPOS=(${{ inputs.repos }})
+        if test ${#REPOS[@]} -le 0; then
+          REPOS=( $(yq -r '.on.workflow_dispatch.inputs.repos.default' .github/workflows/priority-list.yml) )
+        fi
         ./.github/workflows/fetch.sh "${REPOS[@]}"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
