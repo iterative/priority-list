@@ -67,6 +67,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with: { python-version: '3.x' }
+    - run: pip install requests yq
     - name: Fetch issues & PRs
       run: |
         REPOS=(${{ inputs.repos }})
@@ -76,9 +79,6 @@ jobs:
         ./.github/workflows/fetch.sh "${REPOS[@]}"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - uses: actions/setup-python@v4
-      with: { python-version: '3.x' }
-    - run: pip install requests
     - name: Prioritise
       run: |
         ./.github/workflows/prioritise.py >> $GITHUB_STEP_SUMMARY

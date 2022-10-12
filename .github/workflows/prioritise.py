@@ -92,7 +92,7 @@ if __name__ == "__main__":
         )
     else:
         slack_md += "priority"
-    slack_md += " :calendar: staleness\n"
+    slack_md += " :calendar: days stale\n"
     for i in chain(range(min(10, N)), [None], range(N - 5, N)):
         if i is None:
             if N <= 15:
