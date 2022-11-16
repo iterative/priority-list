@@ -22,7 +22,7 @@ on:
           iterative/cml-runner-base-case
           iterative/blog-tpi-jupyter
           iterative/blog-tpi-bees
-        # iterative/cml-playground # not public
+          iterative/cml-playground
       weight_activity:
         required: true
         type: number
