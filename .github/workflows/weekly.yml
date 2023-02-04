@@ -1,6 +1,7 @@
 name: Priority List
 on:
   schedule: [{ cron: '0 2 * * 1' }]  # 02:00 (AM, UTC) Mondays
+  # configurable `workflow_dispatch.inputs` to make it easy to experiment
   workflow_dispatch:
     inputs:
       repos:
@@ -69,25 +70,15 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
       with: { python-version: '3.x' }
-    - run: pip install requests yq
-    - name: Fetch issues & PRs
-      run: |
-        REPOS=(${{ inputs.repos }})
-        if test ${#REPOS[@]} -le 0; then
-          REPOS=( $(yq -r '.on.workflow_dispatch.inputs.repos.default' .github/workflows/priority-list.yml) )
-        fi
-        ./.github/workflows/fetch.sh "${REPOS[@]}"
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Prioritise
-      run: |
-        ./.github/workflows/prioritise.py >> $GITHUB_STEP_SUMMARY
-      env:
-        WEIGHT_ACTIVITY: ${{ inputs.weight_activity }}
-        WEIGHT_REACTIONS: ${{ inputs.weight_reactions }}
-        WEIGHT_STALENESS: ${{ inputs.weight_staleness }}
-        WEIGHT_AGE: ${{ inputs.weight_age }}
-        MULTIPLIER_PR: ${{ inputs.multiplier_pr }}
-        MULTIPLIER_LABELS: ${{ inputs.multiplier_labels }}
-        P_LABEL_GRAVEYARD: ${{ inputs.p_label_graveyard }}
-        SLACK_WEBHOOK: ${{ github.event_name == 'schedule' && secrets.SLACK_WEBHOOK || '' }}
+    # - uses: iterative/priority-list@v1
+    - uses: ./
+      with:
+        github-token: ${{ secrets.GH_TOKEN }}
+        weight_activity: ${{ inputs.weight_activity }}
+        weight_reactions: ${{ inputs.weight_reactions }}
+        weight_staleness: ${{ inputs.weight_staleness }}
+        weight_age: ${{ inputs.weight_age }}
+        multiplier_pr: ${{ inputs.multiplier_pr }}
+        multiplier_labels: ${{ inputs.multiplier_labels }}
+        p_label_graveyard: ${{ inputs.p_label_graveyard }}
+        slack_webhook: ${{ github.event_name == 'schedule' && secrets.SLACK_WEBHOOK || '' }}

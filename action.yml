@@ -1,0 +1,86 @@
+name: Priority List
+description: Make a dent in GitHub issue & PR backlogs across repositories
+author: Casper da Costa-Luis
+inputs:
+  github-token:
+    description: Token with read access to all analysed repos
+    required: true
+  repos:
+    required: true
+    type: string
+  weight_activity:
+    required: true
+    type: number
+    default: 14
+    description: weight for number of comments
+  weight_reactions:
+    required: true
+    type: number
+    default: 7
+    description: weight for reactions to original issue
+  weight_staleness:
+    required: true
+    type: number
+    default: 1
+    description: weight for days of inactivity
+  weight_age:
+    required: true
+    type: number
+    default: 0.142857  # 1/7
+    description: weight for days open
+  multiplier_pr:
+    required: true
+    type: number
+    default: 7
+    description: weight multiplier for PRs (compared to issues)
+  multiplier_labels:
+    required: true
+    type: string
+    default: >-
+      example:-1
+      epic:0.142857
+      blocked:0.142857
+      invalid:0.142857
+    description: weight multiplier for labels (negative to exclude)
+  p_label_graveyard:
+    required: true
+    type: number
+    default: 4
+    description: largest pN-label (lowest priority)
+  slack_webhook:
+    required: false
+    type: string
+    description: URL to post slack payload to (requires `people.json`)
+runs:
+  using: composite
+  steps:
+  - name: setup
+    run: python -m pip install --user -r ${{ github.action_path }}/requirements.txt
+    shell: bash
+  - name: Fetch issues & PRs
+    run: |
+      REPOS=(${{ inputs.repos }})
+      if test ${#REPOS[@]} -le 0; then
+        echo >&2 input repo list is empty
+        exit 1
+      fi
+      ${{ github.action_path }}/fetch.sh "${REPOS[@]}"
+    env:
+      GH_TOKEN: ${{ inputs.github-token }}
+    shell: bash
+  - name: Prioritise
+    run: |
+      ${{ github.action_path }}/prioritise.py >> $GITHUB_STEP_SUMMARY
+    env:
+      WEIGHT_ACTIVITY: ${{ inputs.weight_activity }}
+      WEIGHT_REACTIONS: ${{ inputs.weight_reactions }}
+      WEIGHT_STALENESS: ${{ inputs.weight_staleness }}
+      WEIGHT_AGE: ${{ inputs.weight_age }}
+      MULTIPLIER_PR: ${{ inputs.multiplier_pr }}
+      MULTIPLIER_LABELS: ${{ inputs.multiplier_labels }}
+      P_LABEL_GRAVEYARD: ${{ inputs.p_label_graveyard }}
+      SLACK_WEBHOOK: ${{ inputs.slack_webhook || '' }}
+    shell: bash
+branding:
+  icon: list
+  color: yellow
