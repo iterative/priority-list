@@ -27,6 +27,12 @@ GITHUB_REPOSITORY = os.environ.get("GITHUB_REPOSITORY", "")
 GITHUB_RUN_ID = os.environ.get("GITHUB_RUN_ID", "")
 NOW = datetime.datetime.now()
 
+try:
+    with open("people.json") as fd:
+        PEOPLE = json.load(fd)
+except FileNotFoundError:
+    PEOPLE = {}
+
 
 def age_days(t):
     return (NOW - datetime.datetime.strptime(t, "%Y-%m-%dT%H:%M:%SZ")).days
@@ -66,8 +72,6 @@ def prettify_link(issue, slack=False):
 
 
 def assigned(issue):
-    with open("people.json") as fd:
-        PEOPLE = json.load(fd)
     return " ".join(
         f"<@{user}>"
         for user in filter(None, (PEOPLE.get(i["login"], "") for i in issue["assignees"]))
