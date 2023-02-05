@@ -70,6 +70,8 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
       with: { python-version: '3.x' }
+    - if: github.event_name != 'schedule'
+      uses: pre-commit/action@v3.0.0  # only for basic testing/debugging
     - name: Get GH user to slack handle mapping
       run: wget https://status.cml.dev/people.json
     # - uses: iterative/priority-list@v1
