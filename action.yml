@@ -69,8 +69,7 @@ runs:
       GH_TOKEN: ${{ inputs.github-token }}
     shell: bash
   - name: Prioritise
-    run: |
-      ${{ github.action_path }}/prioritise.py >> $GITHUB_STEP_SUMMARY
+    run: '${{ github.action_path }}/prioritise.py >> $GITHUB_STEP_SUMMARY'
     env:
       WEIGHT_ACTIVITY: ${{ inputs.weight_activity }}
       WEIGHT_REACTIONS: ${{ inputs.weight_reactions }}

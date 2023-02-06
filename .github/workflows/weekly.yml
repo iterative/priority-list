@@ -83,7 +83,7 @@ jobs:
       with: { python-version: '3.x' }
     - if: github.event_name != 'schedule'
       uses: pre-commit/action@v3.0.0  # only for basic testing/debugging
-    - name: Get GH user to slack handle mapping
+    - name: Fetch GitHub user -> Slack member ID mapping
       run: wget https://status.cml.dev/people.json
     # - uses: iterative/priority-list@v1
     - name: Set custom defaults (for github.event_name == 'schedule')
