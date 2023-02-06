@@ -49,12 +49,10 @@ def label_priority(label):
 def priority(issue):
     return (
         (
-            # PRs missing `reactions`
-            WEIGHT_REACTIONS * issue.get("reactions", {"total_count": 0})["total_count"]
+            WEIGHT_REACTIONS * issue["reactions"]["total_count"]
             + WEIGHT_STALENESS * age_days(issue["updated_at"])
             + WEIGHT_AGE * age_days(issue["created_at"])
-            # PRs missing `comments`
-            + WEIGHT_ACTIVITY * issue.get("comments", 0)
+            + WEIGHT_ACTIVITY * issue["comments"]
         )
         * (sum(label_priority(lab["name"]) for lab in issue["labels"]) or P_LABEL_GRAVEYARD)
         * reduce(
