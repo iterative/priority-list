@@ -81,7 +81,13 @@ def assigned(issue):
 
 
 if __name__ == "__main__":
-    issues = sum((json.load(d.open()) for d in pathlib.Path(".").glob("*.*.json")), [])
+    issues = sum(
+        (
+            json.loads(d.read_text().replace("][", ","))
+            for d in pathlib.Path(".").glob("*.*-*.json")
+        ),
+        [],
+    )
     issues.sort(key=priority, reverse=True)
     # drop excluded (more efficient version uses `bisect`)
     # while issues and priority(issues[-1]) < 0: issues.pop()
