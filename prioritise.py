@@ -49,10 +49,12 @@ def label_priority(label):
 def priority(issue):
     return (
         (
-            WEIGHT_REACTIONS * sum(r["users"]["totalCount"] for r in issue["reactionGroups"])
-            + WEIGHT_STALENESS * age_days(issue["updatedAt"])
-            + WEIGHT_AGE * age_days(issue["createdAt"])
-            + WEIGHT_ACTIVITY * len(issue["comments"])
+            # PRs missing `reactions`
+            WEIGHT_REACTIONS * issue.get("reactions", {"total_count": 0})["total_count"]
+            + WEIGHT_STALENESS * age_days(issue["updated_at"])
+            + WEIGHT_AGE * age_days(issue["created_at"])
+            # PRs missing `comments`
+            + WEIGHT_ACTIVITY * issue.get("comments", 0)
         )
         * (sum(label_priority(lab["name"]) for lab in issue["labels"]) or P_LABEL_GRAVEYARD)
         * reduce(
@@ -60,12 +62,12 @@ def priority(issue):
             (MULTIPLIER_LABELS.get(lab["name"], 1) for lab in issue["labels"]),
             1,
         )
-        * (MULTIPLIER_PR if issue["url"].rsplit("/", 2)[-2] == "pull" else 1)
+        * (MULTIPLIER_PR if issue["html_url"].rsplit("/", 2)[-2] == "pull" else 1)
     )
 
 
 def prettify_link(issue, slack=False):
-    url = issue["url"]
+    url = issue["html_url"]
     title = issue["title"]
     pretty = url.split("/", 3)[-1].replace("/issues/", "#").replace("/pull/", "#")
     return f"<{url}|{title}>" if slack else f"[{pretty}]({url})"
@@ -106,7 +108,7 @@ if __name__ == "__main__":
         else:
             print(f"{i}|{priority(issues[i]):.0f}|{prettify_link(issues[i])}")
             slack_md += (
-                f":fire: {priority(issues[i]):.0f} :calendar: {age_days(issues[i]['updatedAt'])}"
+                f":fire: {priority(issues[i]):.0f} :calendar: {age_days(issues[i]['updated_at'])}"
                 f" {prettify_link(issues[i], True)} {assigned(issues[i])}"
                 "\n"
             )
