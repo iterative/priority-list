@@ -1,6 +1,6 @@
 # Priority List
 
-[![Priority List](https://img.shields.io/github/actions/workflow/status/iterative/priority-list/weekly.yml?label=workflow&logo=GitHub)](https://github.com/iterative/priority-list/actions/workflows/weekly.yml)
+[![Priority List](https://img.shields.io/github/actions/workflow/status/iterative/priority-list/weekly.yml?label=action&logo=GitHub)](https://github.com/iterative/priority-list/actions/workflows/weekly.yml)
 
 Make a dent in GitHub issue & PR backlogs across repositories.
 
@@ -40,3 +40,9 @@ jobs:
         p_label_graveyard: 4  # largest pN-label (lowest priority)
         slack_webhook: ${{ secrets.SLACK_WEBHOOK || '' }}  # optional, requires `people.json`
 ```
+
+Assumptions:
+
+- you use `pN-label`s (e.g. `p0-critical`, `p1-important`). These must match the Python regex `[pP](?:riority)[\s:-]*([0-9]+).*`
+- `bug` and `external-request` labels are treated the same as `p1`
+- issues/PRs lacking a `pN-label` are treated as `p0`. This bumps unnoticed/untriaged items to the top of the list. Assign a `pN-label` to lower the priority
