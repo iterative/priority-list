@@ -71,10 +71,14 @@ def prettify_link(issue, slack=False):
     return f"<{url}|{title}>" if slack else f"[{pretty}]({url})"
 
 
-def assigned(issue):
+def assigned(issue, slack=False):
     return " ".join(
-        f"<@{user}>"
-        for user in filter(None, (PEOPLE.get(i["login"], "") for i in issue["assignees"]))
+        (
+            f"<@{user}>"
+            for user in filter(None, (PEOPLE.get(i["login"], "") for i in issue["assignees"]))
+        )
+        if slack
+        else (f"@{i['login']}" for i in issue["assignees"])
     )
 
 
@@ -92,8 +96,8 @@ if __name__ == "__main__":
     issues = issues[: len(issues) - bisect_right(issues[::-1], 0, key=priority)]
     assert not issues or priority(issues[-1]) >= 0
 
-    print("#|weight|link")
-    print("-:|-:|:-")
+    print("#|weight|link|assigned")
+    print("-:|-:|:-|:-")
     N = len(issues)
     slack_md = ":fire: "
     if GITHUB_SERVER_URL and GITHUB_REPOSITORY and GITHUB_RUN_ID:
@@ -107,13 +111,15 @@ if __name__ == "__main__":
         if i is None:
             if N <= 15:
                 break
-            print("...|...|...")
+            print("...|...|...|...")
             slack_md += "...\n"
         else:
-            print(f"{i}|{priority(issues[i]):.0f}|{prettify_link(issues[i])}")
+            print(
+                f"{i}|{priority(issues[i]):.0f}|{prettify_link(issues[i])}|{assigned(issues[i])}"
+            )
             slack_md += (
                 f":fire: {priority(issues[i]):.0f} :calendar: {age_days(issues[i]['updated_at'])}"
-                f" {prettify_link(issues[i], True)} {assigned(issues[i])}"
+                f" {prettify_link(issues[i], True)} {assigned(issues[i], slack=True)}"
                 "\n"
             )
     slack_payload = {
