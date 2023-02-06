@@ -9,7 +9,7 @@ for repo in "${REPOS[@]}"; do
     # also contains PRs
     gh api -H "Accept: application/vnd.github+json" --paginate /repos/${repo}/issues?state=open > issues.$fname || (
       if test -n "$GITHUB_STEP_SUMMARY"; then
-        echo "Could not load $repo" >> $GITHUB_STEP_SUMMARY
+        echo ":warning: could not load [$repo](https://github.com/$repo); token likely missing read access" >> $GITHUB_STEP_SUMMARY
       else
         echo >&2 "Could not load $repo"
       fi

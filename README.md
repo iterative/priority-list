@@ -14,7 +14,7 @@ Click the badge above to see it in action, and see [`action.yml`](./action.yml) 
 name: Priority List
 on: { schedule: [{ cron: '0 1 * * 1' }] }  # 01:00 (AM, UTC) Mondays
 jobs:
-  list:
+  priority-list:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3

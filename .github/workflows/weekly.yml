@@ -75,7 +75,7 @@ on:
         default: 4
         description: largest pN-label (lowest priority)
 jobs:
-  list:
+  priority-list:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
