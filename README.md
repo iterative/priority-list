@@ -43,6 +43,8 @@ jobs:
 
 Assumptions:
 
-- you use `pN-label`s (e.g. `p0-critical`, `p1-important`). These must match the Python regex `[pP](?:riority)[\s:-]*([0-9]+).*`
+- you use `pN-label`s (e.g. `p0-critical`, `p1-important`)
+  + these must match the Python regex `[pP](?:riority)[\s:-]*([0-9]+).*`
 - `bug` and `external-request` labels are treated the same as `p1`
-- issues/PRs lacking a `pN-label` are treated as `p0`. This bumps unnoticed/untriaged items to the top of the list. Assign a `pN-label` to lower the priority
+- issues/PRs lacking a `pN-label` are treated as `p0`
+  + this bumps unnoticed/untriaged items to the top of the list, thus encouraging you to at least assign a `pN-label` to (potentially) lower the priority

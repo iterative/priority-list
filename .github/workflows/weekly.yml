@@ -32,6 +32,8 @@ on:
           iterative/cml-runner-base-case
           iterative/blog-tpi-jupyter
           iterative/blog-tpi-bees
+          iterative/cml-textual-inversion
+          iterative/discord-corpus
           iterative/tpi
       weight_activity:
         required: true
