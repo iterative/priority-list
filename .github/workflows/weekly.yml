@@ -82,14 +82,29 @@ jobs:
     - name: Get GH user to slack handle mapping
       run: wget https://status.cml.dev/people.json
     # - uses: iterative/priority-list@v1
+    - name: Set custom defaults (for github.event_name == 'schedule')
+      id: default
+      run: |
+        REPOS=(${{ inputs.repos }})
+        if test ${#REPOS[@]} -le 0; then
+          REPOS=( $(yq -r '.on.workflow_dispatch.inputs.repos.default' .github/workflows/weekly.yml) )
+        fi
+        echo "repos=${REPOS[@]}" >> $GITHUB_OUTPUT
+
+        MULTIPLIER_LABELS=(${{ inputs.multiplier_labels }})
+        if test ${#MULTIPLIER_LABELS[@]} -le 0; then
+          REPOS=( $(yq -r '.on.workflow_dispatch.inputs.multiplier_labels.default' .github/workflows/weekly.yml) )
+        fi
+        echo "multiplier_labels=${MULTIPLIER_LABELS[@]}" >> $GITHUB_OUTPUT
     - uses: ./
       with:
+        repos: ${{ steps.default.outputs.repos }}
         github-token: ${{ secrets.GH_TOKEN }}
         weight_activity: ${{ inputs.weight_activity }}
         weight_reactions: ${{ inputs.weight_reactions }}
         weight_staleness: ${{ inputs.weight_staleness }}
         weight_age: ${{ inputs.weight_age }}
         multiplier_pr: ${{ inputs.multiplier_pr }}
-        multiplier_labels: ${{ inputs.multiplier_labels }}
+        multiplier_labels: ${{ steps.default.outputs.multiplier_labels }}
         p_label_graveyard: ${{ inputs.p_label_graveyard }}
         slack_webhook: ${{ github.event_name == 'schedule' && secrets.SLACK_WEBHOOK || '' }}
