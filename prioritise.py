@@ -96,26 +96,26 @@ if __name__ == "__main__":
     issues = issues[: len(issues) - bisect_right(issues[::-1], 0, key=priority)]
     assert not issues or priority(issues[-1]) >= 0
 
-    print("#|weight|link|assigned")
-    print("-:|-:|:-|:-")
+    source_link = (
+        f"{GITHUB_SERVER_URL}/{GITHUB_REPOSITORY}/actions/runs/{GITHUB_RUN_ID}"
+        if GITHUB_SERVER_URL and GITHUB_REPOSITORY and GITHUB_RUN_ID
+        else "https://github.com/iterative/priority-list#notes"
+    )
+    print(f"#|[priority]({source_link})|days stale|link|assigned")
+    print("-:|-:|-:|:-|:-")
     N = len(issues)
-    slack_md = ":fire: "
-    if GITHUB_SERVER_URL and GITHUB_REPOSITORY and GITHUB_RUN_ID:
-        slack_md += (
-            f"*<{GITHUB_SERVER_URL}/{GITHUB_REPOSITORY}/actions/runs/{GITHUB_RUN_ID}|priority>*"
-        )
-    else:
-        slack_md += "priority"
+    slack_md = f":fire: *<{source_link}|priority>*"
     slack_md += " :calendar: days stale\n"
     for i in chain(range(min(10, N)), [None], range(N - 5, N)):
         if i is None:
             if N <= 15:
                 break
-            print("...|...|...|...")
+            print("...|...|...|...|...")
             slack_md += "...\n"
         else:
             print(
-                f"{i}|{priority(issues[i]):.0f}|{prettify_link(issues[i])}|{assigned(issues[i])}"
+                f"{i}|{priority(issues[i]):.0f}|{age_days(issues[i]['updated_at'])}"
+                f"|{prettify_link(issues[i])}|{assigned(issues[i])}"
             )
             slack_md += (
                 f":fire: {priority(issues[i]):.0f} :calendar: {age_days(issues[i]['updated_at'])}"
