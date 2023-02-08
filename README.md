@@ -4,9 +4,9 @@
 
 Make a dent in GitHub issue & PR backlogs across repositories.
 
-Aimed at teams managing multiple projects and sick of [the time cost of refinement/triage](https://xkcd.com/1445).
+Aimed at teams managing multiple projects and sick of [the time cost of refinement/triage](https://xkcd.com/1445):
 
-![screenshot](https://imgs.xkcd.com/comics/efficiency.png "TODO: replace with GHA job summary + Slack screenshots")
+![screenshot](https://imgs.xkcd.com/comics/efficiency.png "xkcd#1445")
 
 See [`action.yml`](./action.yml) for a full list of configuration options.
 
@@ -42,6 +42,19 @@ jobs:
         p_label_graveyard: 4  # largest pN-label (lowest priority)
         slack_webhook: ${{ secrets.SLACK_WEBHOOK || '' }}  # optional; requires `people.json`
 ```
+
+### Example output
+
+GitHub Actions job summary:
+
+#|[priority](https://github.com/iterative/priority-list#notes)|days stale|link|assigned
+-:|-:|-:|:-|:-
+0|20377|50|[iterative/dvc#755](https://github.com/iterative/dvc/issues/755)|@efiop
+1|17062|0|[iterative/cml#1326](https://github.com/iterative/cml/pull/1326)|@dacbd @0x2b3bfa0
+2|15000|41|[iterative/cml.dev#382](https://github.com/iterative/cml.dev/pull/382)|@jorgeorpinel
+3|69|15|[iterative/shtab#127](https://github.com/iterative/shtab/issues/127)|@casperdcl
+4|0|0|[iterative/priority-list#3](https://github.com/iterative/priority-list/issues/3)|@casperdcl
+...|...|...|...|...
 
 ## Notes
 
