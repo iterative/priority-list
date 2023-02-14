@@ -43,7 +43,7 @@ def label_priority(label):
         return P_LABEL_GRAVEYARD - int(p.group(1))
     if re.search("bug|external-request", label, flags=re.I):
         return P_LABEL_GRAVEYARD - 1  # same as p1-important
-    return P_LABEL_GRAVEYARD - 0  # default: p0-unlabelled
+    return 0  # default: no contribution
 
 
 def priority(issue):
@@ -54,7 +54,10 @@ def priority(issue):
             + WEIGHT_AGE * age_days(issue["created_at"])
             + WEIGHT_ACTIVITY * issue["comments"]
         )
-        * (sum(label_priority(lab["name"]) for lab in issue["labels"]) or P_LABEL_GRAVEYARD)
+        * (
+            sum(label_priority(lab["name"]) for lab in issue["labels"])
+            or P_LABEL_GRAVEYARD - 0  # default: p0-unlabelled
+        )
         * reduce(
             lambda x, y: x * y,
             (MULTIPLIER_LABELS.get(lab["name"], 1) for lab in issue["labels"]),
