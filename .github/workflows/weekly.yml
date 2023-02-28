@@ -1,6 +1,6 @@
 name: Priority List
 on:
-  schedule: [{ cron: '0 2 * * 1' }]  # 02:00 (AM, UTC) Mondays
+  # schedule: [{ cron: '0 2 * * 1' }]  # 02:00 (AM, UTC) Mondays
   push: { branches: [v*] }
   pull_request:
   # configurable `workflow_dispatch.inputs` to make it easy to experiment
