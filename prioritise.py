@@ -49,10 +49,10 @@ def label_priority(label):
 def priority(issue):
     return (
         (
-            WEIGHT_REACTIONS * issue["reactions"]["total_count"]
-            + WEIGHT_STALENESS * age_days(issue["updated_at"])
-            + WEIGHT_AGE * age_days(issue["created_at"])
-            + WEIGHT_ACTIVITY * issue["comments"]
+            WEIGHT_REACTIONS * sum(r["users"]["totalCount"] for r in issue["reactionGroups"])
+            + WEIGHT_STALENESS * age_days(issue["updatedAt"])
+            + WEIGHT_AGE * age_days(issue["createdAt"])
+            + WEIGHT_ACTIVITY * len(issue["comments"])
         )
         * (
             sum(label_priority(lab["name"]) for lab in issue["labels"])
@@ -63,12 +63,12 @@ def priority(issue):
             (MULTIPLIER_LABELS.get(lab["name"], 1) for lab in issue["labels"]),
             1,
         )
-        * (MULTIPLIER_PR if issue["html_url"].rsplit("/", 2)[-2] == "pull" else 1)
+        * (MULTIPLIER_PR if issue["url"].rsplit("/", 2)[-2] == "pull" else 1)
     )
 
 
 def prettify_link(issue, slack=False):
-    url = issue["html_url"]
+    url = issue["url"]
     title = issue["title"]
     pretty = url.split("/", 3)[-1].replace("/issues/", "#").replace("/pull/", "#")
     return f"<{url}|{title}>" if slack else f"[{pretty}]({url})"
@@ -86,13 +86,7 @@ def assigned(issue, slack=False):
 
 
 if __name__ == "__main__":
-    issues = sum(
-        (
-            json.loads(d.read_text().replace("][", ","))
-            for d in pathlib.Path(".").glob("*.*-*.json")
-        ),
-        [],
-    )
+    issues = sum((json.load(d.open()) for d in pathlib.Path(".").glob("*s.*-*.json")), [])
     issues.sort(key=priority, reverse=True)
     # drop excluded (more efficient version uses `bisect`)
     # while issues and priority(issues[-1]) < 0: issues.pop()
@@ -117,11 +111,11 @@ if __name__ == "__main__":
             slack_md += "...\n"
         else:
             print(
-                f"{i}|{priority(issues[i]):.0f}|{age_days(issues[i]['updated_at'])}"
+                f"{i}|{priority(issues[i]):.0f}|{age_days(issues[i]['updatedAt'])}"
                 f"|{prettify_link(issues[i])}|{assigned(issues[i])}"
             )
             slack_md += (
-                f":fire: {priority(issues[i]):.0f} :calendar: {age_days(issues[i]['updated_at'])}"
+                f":fire: {priority(issues[i]):.0f} :calendar: {age_days(issues[i]['updatedAt'])}"
                 f" {prettify_link(issues[i], True)} {assigned(issues[i], slack=True)}"
                 "\n"
             )
