@@ -111,4 +111,4 @@ jobs:
         multiplier_pr: ${{ inputs.multiplier_pr }}
         multiplier_labels: ${{ steps.default.outputs.multiplier_labels }}
         p_label_graveyard: ${{ inputs.p_label_graveyard }}
-        slack_webhook: ${{ github.event_name == 'schedule' && secrets.SLACK_WEBHOOK || '' }}
+        # slack_webhook: ${{ github.event_name == 'schedule' && secrets.SLACK_WEBHOOK || '' }}
